@@ -1,5 +1,5 @@
 clear all;
-load p_2d_3
+load p_2d_shark
 
 
 [F,P]=size(p_2d);F=F/2;
@@ -73,7 +73,7 @@ end
         
         subject to
         Q>=0
-        sum(q)==1
+        sum(q)>0
         
     cvx_end
     
@@ -89,7 +89,7 @@ end
     R_mat=[];
     
     
-    N_mat=zeros(2*F,9*K);
+%     N_mat=zeros(2*F,9*K);
     for i=1:F
             Pihat_i=Pihat(2*i-1:2*i,:);
             cRi(:,:,i)=Pihat_i*Gk;
@@ -120,29 +120,40 @@ end
             
             R_i_prev=R_i;
             
-            N_mat(2*i-1:2*i,:)=kron(null(rri)',Pihat_i);
+%             N_mat(2*i-1:2*i,:)=kron(null(rri)',Pihat_i);
     end
     
-    [U,D,V]=svd(N_mat);
-    
-    vecG=V(:,end-K+1:end);
-    
-    G=zeros(3*K,3*K);
-    for i=1:size(vecG,2)
-        G(:,3*i-2:3*i)=reshape(vecG(:,i),3*K,3);
-    end
-    G=G/norm(G);
-    
-    Pi=Pihat*G;
-    
-    B=inv(G)*Bhat;
+%     [U,D,V]=svd(N_mat);
 %     
+%     vecG=V(:,end-K+1:end);
 %     
+%     G=zeros(3*K,3*K);
+%     for i=1:size(vecG,2)
+%         G(:,3*i-2:3*i)=reshape(vecG(:,i),3*K,3);
+%     end
+%     G=G/norm(G);
+%     
+%     Pi=Pihat*G;
+%     
+%     B=inv(G)*Bhat;
+% %     
+% %     
 %    
-% S=R_mat'*inv(R_mat*R_mat')*W;
+
+
+H=zeros(3*F-3,3*F);
+for i=1:3*F-3
+    H(i,i)=1;
+    H(i,i+3)=-1;
+end
+
+lambda=1;
+
+S=inv(R_mat'*R_mat+lambda*H'*H)*R_mat'*W;
 
     
 % B=inv([Gk Gk Gk])*Bhat;
 
 
-% for i=1:F;scatter3(S(3*i-2,:),S(3*i-1,:),S(3*i,:));pause();end
+for i=1:F;scatter3(S(3*i-2,:),S(3*i-1,:),S(3*i,:));axis([-200 200 -200 200 -200 200])
+    pause();end
